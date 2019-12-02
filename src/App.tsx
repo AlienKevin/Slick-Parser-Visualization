@@ -1,24 +1,31 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Tree from "react-d3-tree";
+import {Traverser} from "./generateParseTree";
+
+const source =
+`_ :
+    print 'hello world👋'
+`
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="App" style={{width: "100%", height: "100vh"}}>
+      <Tree
+        data={new Traverser().traverse(source)}
+        orientation="vertical"
+        translate={{
+          x: 600,
+          y: 50
+        }}
+        textLayout={{
+          textAnchor: 'middle',
+          y: 20
+        }}
+        separation={{
+          siblings: 1.25,
+          nonSiblings: 1.5
+        }}
+      />
     </div>
   );
 }
