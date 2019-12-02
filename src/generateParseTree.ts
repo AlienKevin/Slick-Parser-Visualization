@@ -6,7 +6,8 @@ import runtime from "slick-lang/dist/Runtime";
 
 type Node = {
     name: string,
-    attributes: {[key: string]: string},
+    attributes?: {[key: string]: string},
+    _collapsed: boolean,
     children: Node[]
 }
 
@@ -18,40 +19,36 @@ class Traverser implements Visitor {
 
         const rootNode = {
             name: "Slick Program",
-            attributes: {},
             children: statements.map(
                 (stmt) => this.stmt(stmt)
-            )
+            ),
+            _collapsed: true
         };
 
         return rootNode;
     }
 
-    stmt(stmt: Stmt) {
+    stmt(stmt: Stmt): Node {
         return stmt.accept(this);
     }
 
-    expr(expr: Expr, name?: string) {
+    expr(expr: Expr, name?: string): Node {
         const node = expr.accept(this);
         if (name !== undefined) {
             return {
                 name: name,
-                attributes: {},
                 children: [
                     node
-                ]
+                ],
+                _collapsed: true
             }
         } else {
             return node;
         }
     }
 
-    exprs(exprs: Expr[]) {
+    exprs(exprs: Expr[]): Node[] {
         return exprs.map((expr) => this.expr(expr))
-    }
-
-    addChild(parent: Node, child: Node) {
-        parent.children.push(child);
     }
 
     leafNode(leafName: any, parentName?: string): Node {
@@ -59,15 +56,15 @@ class Traverser implements Visitor {
             parentName === undefined
             ? {
                 name: leafName,
-                attributes: {},
-                children: []
+                children: [],
+                _collapsed: true
             }
             : {
                 name: parentName,
-                attributes: {},
                 children: [
                     this.leafNode(leafName)
-                ]
+                ],
+                _collapsed: true
             }
         );
     }
@@ -79,7 +76,6 @@ class Traverser implements Visitor {
     visitIfExpr(expr: If) {
         return {
             name: "If Expression",
-            attributes: {},
             children: [
                 this.expr(expr.condition),
                 this.expr(expr.thenBranch),
@@ -91,7 +87,6 @@ class Traverser implements Visitor {
     visitBinaryExpr(expr: Binary) {
         return {
             name: "Binary Expression",
-            attributes: {},
             children: [
                 this.expr(expr.left),
                 this.token(expr.operator, "operator"),
@@ -102,7 +97,6 @@ class Traverser implements Visitor {
     visitGroupingExpr(expr: Grouping) {
         return {
             name: "Grouping Expression",
-            attributes: {},
             children: [
                 this.leafNode("("),
                 this.expr(expr.expression),
@@ -113,7 +107,6 @@ class Traverser implements Visitor {
     visitLiteralExpr(expr: Literal) {
         return {
             name: "Literal Expression",
-            attributes: {},
             children: [
                 this.leafNode(runtime.toString(expr.value))
             ]
@@ -122,7 +115,6 @@ class Traverser implements Visitor {
     visitVariableExpr(expr: Variable) {
         return {
             name: "Binding",
-            attributes: {},
             children: [
                 this.token(expr.name)
             ]
@@ -131,7 +123,6 @@ class Traverser implements Visitor {
     visitCallExpr(expr: Call) {
         return {
             name: "Call Expression",
-            attributes: {},
             children: [
                 this.expr(expr.callee),
                 ...this.exprs(expr.argumentList)
@@ -141,7 +132,6 @@ class Traverser implements Visitor {
     visitListLiteralExpr(expr: ListLiteral) {
         return {
             name: "List Literal",
-            attributes: {},
             children: [
                 ...this.exprs(expr.list)
             ]
@@ -150,7 +140,6 @@ class Traverser implements Visitor {
     visitRecordLiteralExpr(expr: RecordLiteral) {
         return {
             name: "Record Literal",
-            attributes: {},
             children: [
                 ...(
                     expr.target === undefined
@@ -178,7 +167,6 @@ class Traverser implements Visitor {
     visitVarDeclarationStmt(stmt: VarDeclaration) {
         return {
             name: "Binding Declaration",
-            attributes: {},
             children: [
                 this.token(stmt.name, "Binding Name"),
                 this.expr(stmt.initializer)
@@ -188,7 +176,6 @@ class Traverser implements Visitor {
     visitCustomTypeDeclarationStmt(stmt: CustomTypeDeclaration) {
         return {
             name: "Custom Type Declaration",
-            attributes: {},
             children: [
                 this.token(stmt.name, "Custom Type Name"),
                 ...Object.entries(stmt.subtypes).reduce((subtypes: Node[], [key, type]) =>
