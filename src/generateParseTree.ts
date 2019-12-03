@@ -29,6 +29,13 @@ class Traverser implements Visitor {
     }
 
     stmt(stmt: Stmt): Node {
+        if (stmt === null || stmt === undefined) {
+            return {
+                name: "Empty Statement",
+                children: [],
+                _collapsed: true
+            };
+        }
         return stmt.accept(this);
     }
 
