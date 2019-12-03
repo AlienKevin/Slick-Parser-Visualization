@@ -76,12 +76,21 @@ class Traverser implements Visitor {
         );
     }
 
-    token(token: Token, name?: string) {
-        return this.leafNode(token.lexeme, name);
-    }
-
-    tokens(tokens: Token[]) {
-        return tokens.map((token) => this.token(token));
+    leafNodes(leaves: any[], parentName?: string) {
+        const result = leaves.map((leaf) => this.leafNode(leaf));
+        if (parentName !== undefined) {
+            return (
+                result.length > 0
+                ? [{
+                    name: parentName,
+                    children: result,
+                    _collapsed: true
+                }]
+                : []
+            );
+        } else {
+            return result;
+        }
     }
 
     visitIfExpr(expr: If) {
@@ -100,7 +109,7 @@ class Traverser implements Visitor {
             name: "Binary Expression",
             children: [
                 this.expr(expr.left),
-                this.token(expr.operator, "operator"),
+                this.leafNode(expr.operator, "operator"),
                 this.expr(expr.right),
             ]
         }
@@ -127,7 +136,7 @@ class Traverser implements Visitor {
         return {
             name: "Binding",
             children: [
-                this.token(expr.name)
+                this.leafNode(expr.name)
             ]
         }
     }
@@ -170,10 +179,7 @@ class Traverser implements Visitor {
         return {
             name: "Function Expression",
             children: [
-                {
-                    name: "Parameters",
-                    children: this.tokens(expr.params)
-                },
+                this.leafNodes(expr.params, "Parameters"),
                 this.expr(expr.body, "Body")
             ]
         }
@@ -194,7 +200,7 @@ class Traverser implements Visitor {
         return {
             name: "Binding Declaration",
             children: [
-                this.token(stmt.name, "Binding Name"),
+                this.leafNode(stmt.name, "Binding Name"),
                 this.expr(stmt.initializer)
             ]
         }
@@ -203,7 +209,7 @@ class Traverser implements Visitor {
         return {
             name: "Custom Type Declaration",
             children: [
-                this.token(stmt.name, "Custom Type Name"),
+                this.leafNode(stmt.name, "Custom Type Name"),
                 ...Object.entries(stmt.subtypes).reduce((subtypes: Node[], [key, type]) =>
                     [
                         ...subtypes,
