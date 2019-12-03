@@ -194,7 +194,26 @@ class Traverser implements Visitor {
         }
     }
     visitCaseExpr(expr: Case) {
-        throw new Error("Method not implemented.");
+        return {
+            name: "Case Expression",
+            children: [
+                this.expr(expr.expr, "Conditional"),
+                ...expr.cases.map((branch) => {
+                    return {
+                        name: "Branch",
+                        children: [
+                            (
+                                branch.subtype instanceof Token
+                                ? this.leafNode(branch.subtype, "Subtype")
+                                : this.expr(branch.subtype, "Value")
+                            ),
+                            ...this.leafNodes(branch.parameters, "Parameters"),
+                            this.expr(branch.result, "Result")
+                        ]
+                    }
+                })
+            ]
+        }
     }
     visitVarDeclarationStmt(stmt: VarDeclaration) {
         return {

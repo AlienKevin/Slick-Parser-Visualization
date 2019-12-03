@@ -8,16 +8,45 @@ const source =
 // _ :
 //     foo '👋'
 // `
+// `
+// person :
+//   {
+//     name : 'Ben'
+//     age : 10
+//   }
+
+// _ :
+//   person.name
+
+// `
+
+// `
+// a :
+//   case 3 of
+//     0 →
+//       0
+//     1 →
+//       1
+//     2 →
+//       2
+//     _ →
+//       3
+// `
+
 `
-person :
-  {
-    name : 'Ben'
-    age : 10
-  }
+type Msg :
+  Success Text
+  Fail Text
 
-_ :
-  person.name
+msg :
+  Success 'abc'
 
+a :
+  case msg of
+    Success msg →
+      msg
+    Fail error →
+      error
 `
 
 function App() {
