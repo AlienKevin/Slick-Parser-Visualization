@@ -172,7 +172,13 @@ class Traverser implements Visitor {
         }
     }
     visitGetExpr(expr: Get) {
-        throw new Error("Method not implemented.");
+        return {
+            name: "Get Expression",
+            children: [
+                this.expr(expr.object, "Record"),
+                this.leafNode("'" + expr.name.lexeme + "'", "Property Name"),
+            ]
+        }
     }
     visitCaseExpr(expr: Case) {
         throw new Error("Method not implemented.");
