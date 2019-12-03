@@ -62,14 +62,14 @@ class Traverser implements Visitor {
         return (
             parentName === undefined
             ? {
-                name: leafName,
+                name: leafName.toString(),
                 children: [],
                 _collapsed: true
             }
             : {
                 name: parentName,
                 children: [
-                    this.leafNode(leafName)
+                    this.leafNode(leafName.toString())
                 ],
                 _collapsed: true
             }
