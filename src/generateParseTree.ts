@@ -73,6 +73,10 @@ class Traverser implements Visitor {
         return this.leafNode(token.lexeme, name);
     }
 
+    tokens(tokens: Token[]) {
+        return tokens.map((token) => this.token(token));
+    }
+
     visitIfExpr(expr: If) {
         return {
             name: "If Expression",
@@ -156,7 +160,16 @@ class Traverser implements Visitor {
         }
     }
     visitFunctionExpr(expr: Function) {
-        throw new Error("Method not implemented.");
+        return {
+            name: "Function Expression",
+            children: [
+                {
+                    name: "Parameters",
+                    children: this.tokens(expr.params)
+                },
+                this.expr(expr.body, "Body")
+            ]
+        }
     }
     visitGetExpr(expr: Get) {
         throw new Error("Method not implemented.");

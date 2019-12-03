@@ -3,8 +3,10 @@ import Tree from "react-d3-tree";
 import {Traverser} from "./generateParseTree";
 
 const source =
-`_ :
-    print 'hello world👋'
+`foo : ƒ emoji1 emoji2
+    print ('hello world' & emoji1 & emoji2)
+_ :
+    foo '👋'
 `
 
 function App() {
